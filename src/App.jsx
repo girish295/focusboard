@@ -17,7 +17,6 @@ import {
   ListTodo, 
   Percent, 
   Sparkles, 
-  Plus, 
   RotateCcw
 } from 'lucide-react'
 
@@ -284,29 +283,6 @@ function App() {
           {/* Focus Notes Carousel */}
           <FocusNotes />
 
-          {/* Quick Action Bar */}
-          <div className="dashboard-action-bar">
-            <div className="action-buttons">
-              <button 
-                type="button" 
-                className="btn btn-primary"
-                onClick={handleOpenCreateModal}
-              >
-                <Plus size={16} />
-                <span>Create Task</span>
-              </button>
-
-              <button 
-                type="button" 
-                className="btn btn-secondary"
-                onClick={handleResetSampleData}
-              >
-                <RotateCcw size={16} />
-                <span>Reset to Sample Tasks</span>
-              </button>
-            </div>
-          </div>
-
           {/* Search & Filter Suite */}
           <div className="search-filter-section">
             <SearchBar 
@@ -326,7 +302,7 @@ function App() {
             />
           </div>
 
-          {/* Section Header with Active Results Count */}
+          {/* Section Header with Active Results Count & Reset Action */}
           <div className="dashboard-section-header">
             <div>
               <h2 className="section-title">
@@ -338,6 +314,18 @@ function App() {
                   : `Browse, filter, and organize all tasks on your board.`
                 }
               </p>
+            </div>
+
+            <div className="section-header-actions">
+              <button 
+                type="button" 
+                className="btn btn-secondary btn-sm"
+                onClick={handleResetSampleData}
+                title="Reset all tasks to initial sample dataset"
+              >
+                <RotateCcw size={14} />
+                <span>Reset to Sample Tasks</span>
+              </button>
             </div>
           </div>
 
