@@ -1,8 +1,11 @@
+import { TrendingUp } from 'lucide-react'
+
 /**
  * StatCard Component
  * 
  * Reusable dynamic metric display card.
  * Calculates and visualizes task performance metrics dynamically without redundant state.
+ * Includes SVG circular completion ring for the 'rate' variant.
  * 
  * @param {Object} props
  * @param {React.ElementType} props.icon - Lucide icon component.
@@ -28,25 +31,41 @@ export function StatCard({
       <div className={`stat-card-accent stat-accent-${variant}`} aria-hidden="true" />
       
       <div className="stat-card-top">
-        <div className={`stat-icon-wrapper stat-icon-${variant}`} aria-hidden="true">
-          {Icon && <Icon size={20} />}
-        </div>
         <span className="stat-label">{label}</span>
+        <div className={`stat-icon-wrapper stat-icon-${variant}`} aria-hidden="true">
+          {Icon && <Icon size={16} />}
+        </div>
       </div>
 
       <div className="stat-card-bottom">
-        <div className="stat-value">{value}</div>
-        
-        {isRate && (
-          <div className="stat-progress-bar-track" aria-hidden="true">
-            <div 
-              className="stat-progress-bar-fill" 
-              style={{ width: `${Math.min(100, Math.max(0, numericRate))}%` }} 
-            />
+        {isRate ? (
+          <div className="stat-rate-split">
+            <div>
+              <div className="stat-value">{value}</div>
+              {subtext && <p className="stat-subtext">{subtext}</p>}
+            </div>
+
+            <div className="stat-ring-container" aria-hidden="true">
+              <svg className="stat-ring-svg" viewBox="0 0 56 56">
+                <circle cx="28" cy="28" r="22" className="stat-ring-track" />
+                <circle 
+                  cx="28" 
+                  cy="28" 
+                  r="22" 
+                  className="stat-ring-meter"
+                  strokeDasharray="138.23"
+                  strokeDashoffset={(138.23 - (numericRate / 100) * 138.23).toFixed(2)}
+                />
+              </svg>
+              <TrendingUp size={14} className="stat-ring-arrow" />
+            </div>
+          </div>
+        ) : (
+          <div className="stat-value-row">
+            <div className="stat-value">{value}</div>
+            {subtext && <p className="stat-subtext">{subtext}</p>}
           </div>
         )}
-
-        {subtext && <p className="stat-subtext">{subtext}</p>}
       </div>
     </article>
   )

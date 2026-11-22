@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar'
 import { Header } from './components/Header'
 import { StatCard } from './components/StatCard'
 import { FocusNotes } from './components/FocusNotes'
+import { DeepFocusTimer } from './components/DeepFocusTimer'
 import { SearchBar } from './components/SearchBar'
 import { FilterTabs } from './components/FilterTabs'
 import { TaskList } from './components/TaskList'
@@ -23,10 +24,10 @@ import {
 function App() {
   // Single Source of Truth for tasks, persisted to localStorage
   const [tasks, setTasks] = useLocalStorage('focusboard_tasks', sampleTasks)
-  
-  // Theme State: 'crisp' | 'warm' | 'emerald' | 'midnight'
-  const [theme, setTheme] = useLocalStorage('focusboard_theme', 'crisp')
-  
+
+  // Theme State: 'bento' | 'obsidian' | 'scandi' | 'topnav'
+  const [theme, setTheme] = useLocalStorage('focusboard_theme', 'bento')
+
   // Navigation & Layout State
   const [activeNav, setActiveNav] = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -118,34 +119,31 @@ function App() {
 
   const handleFormSubmit = (taskData) => {
     if (taskToEdit) {
-      // Edit mode: update selected task while preserving id and createdAt
-      setTasks((prevTasks) =>
-        prevTasks.map((t) =>
-          t.id === taskData.id
-            ? { ...t, ...taskData, id: t.id, createdAt: t.createdAt }
-            : t
-        )
+      // Edit existing task
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskToEdit.id ? { ...t, ...taskData } : t))
       )
       addToast(`Task "${taskData.title}" updated successfully.`, 'success')
     } else {
-      // Create mode: add new task to top of list
+      // Create new task (prepend to top)
       const newTask = {
         ...taskData,
-        id: `task-${Date.now()}`,
-        createdAt: Date.now()
+        id: `task-${Date.now()}`
       }
-      setTasks((prevTasks) => [newTask, ...prevTasks])
-      addToast(`Task "${newTask.title}" created successfully.`, 'success')
+      setTasks((prev) => [newTask, ...prev])
+      addToast(`New task "${taskData.title}" created.`, 'success')
     }
+    setIsFormOpen(false)
+    setTaskToEdit(null)
   }
 
   // ---------------------------------------------------------------------------
-  // Delete Confirmation Flow
+  // Delete Safety Handlers
   // ---------------------------------------------------------------------------
   const handleRequestDelete = (taskId) => {
-    const task = tasks.find((t) => t.id === taskId)
-    if (task) {
-      setTaskToDelete(task)
+    const target = tasks.find((t) => t.id === taskId)
+    if (target) {
+      setTaskToDelete(target)
       setIsConfirmOpen(true)
     }
   }
@@ -153,49 +151,71 @@ function App() {
   const handleConfirmDelete = () => {
     if (taskToDelete) {
       setTasks((prev) => prev.filter((t) => t.id !== taskToDelete.id))
-      addToast(`Task "${taskToDelete.title}" was deleted.`, 'info')
-      setIsConfirmOpen(false)
+      addToast(`Task "${taskToDelete.title}" deleted.`, 'info')
       setTaskToDelete(null)
+      setIsConfirmOpen(false)
     }
   }
 
   const handleCancelDelete = () => {
-    setIsConfirmOpen(false)
     setTaskToDelete(null)
+    setIsConfirmOpen(false)
   }
 
   // ---------------------------------------------------------------------------
-  // Status Changes & Reset
+  // Inline Status Change Handler
   // ---------------------------------------------------------------------------
   const handleStatusChange = (taskId, newStatus) => {
     setTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
+      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
     )
-    const task = tasks.find((t) => t.id === taskId)
-    const statusLabels = { todo: 'To Do', 'in-progress': 'In Progress', completed: 'Completed' }
-    addToast(`"${task ? task.title : 'Task'}" moved to ${statusLabels[newStatus] || newStatus}.`, 'info')
+    const statusLabels = {
+      todo: 'To Do',
+      'in-progress': 'In Progress',
+      completed: 'Completed'
+    }
+    addToast(`Task moved to "${statusLabels[newStatus] || newStatus}".`, 'info')
   }
 
+  // ---------------------------------------------------------------------------
+  // Reset Sample Dataset
+  // ---------------------------------------------------------------------------
   const handleResetSampleData = () => {
     setTasks(sampleTasks)
-    handleClearFilters()
-    addToast('Restored 6 initial sample tasks to state & storage.', 'info')
+    setSearchTerm('')
+    setStatusFilter('all')
+    setPriorityFilter('all')
+    addToast('Board reset to initial sample tasks.', 'info')
   }
 
   // ---------------------------------------------------------------------------
-  // Global Keyboard Shortcuts (Press '/' to focus search, 'c' to create task)
+  // Sidebar Navigation Handler
+  // ---------------------------------------------------------------------------
+  const handleNavSelect = (navId) => {
+    setActiveNav(navId)
+    if (navId === 'tasks') {
+      setStatusFilter('all')
+      setPriorityFilter('all')
+      setSearchTerm('')
+    }
+    addToast(`Navigated to ${navId.charAt(0).toUpperCase() + navId.slice(1)}.`, 'info')
+  }
+
+  // ---------------------------------------------------------------------------
+  // Synchronize Theme to Document Element
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    const handleGlobalKeyDown = (e) => {
-      const activeEl = document.activeElement
-      const tagName = activeEl ? activeEl.tagName.toLowerCase() : ''
-      const isInputFocused = tagName === 'input' || tagName === 'textarea' || tagName === 'select' || activeEl?.isContentEditable
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
-      if (isInputFocused) {
-        return
-      }
+  // ---------------------------------------------------------------------------
+  // Global Keyboard Shortcuts ('/' for search, 'c' for new task)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't intercept if user is typing in an input/textarea
+      const tag = document.activeElement?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
 
       if (e.key === '/') {
         e.preventDefault()
@@ -205,34 +225,32 @@ function App() {
           searchInput.select()
         }
       } else if (e.key === 'c' || e.key === 'C') {
-        if (!isFormOpen && !isConfirmOpen) {
-          e.preventDefault()
-          handleOpenCreateModal()
-        }
+        e.preventDefault()
+        handleOpenCreateModal()
       }
     }
 
-    window.addEventListener('keydown', handleGlobalKeyDown)
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown)
-  }, [isFormOpen, isConfirmOpen])
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   return (
-    <div className="app-layout" data-theme={theme}>
-      {/* WCAG Skip to Main Content Link */}
+    <div className="app-layout">
+      {/* WCAG Skip Navigation Link */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
 
-      {/* Responsive Collapsible Sidebar */}
+      {/* Accessible Sidebar Navigation Drawer */}
       <Sidebar 
         activeNav={activeNav}
-        onNavSelect={setActiveNav}
+        onNavSelect={handleNavSelect}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      {/* Main Content Area */}
       <div className="main-wrapper">
+        {/* Sticky Dashboard Header */}
         <Header 
           onOpenCreateTask={handleOpenCreateModal}
           onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
@@ -248,28 +266,28 @@ function App() {
               label="Total Tasks"
               value={totalTasks}
               variant="total"
-              subtext="Across all categories"
+              subtext="All categories"
             />
             <StatCard 
               icon={Clock}
               label="To Do"
               value={todoCount}
               variant="todo"
-              subtext="Awaiting initiation"
+              subtext="Awaiting start"
             />
             <StatCard 
               icon={Sparkles}
               label="In Progress"
               value={inProgressCount}
               variant="progress"
-              subtext="Currently in flight"
+              subtext="In flight"
             />
             <StatCard 
               icon={CheckCircle2}
               label="Completed"
               value={completedCount}
               variant="completed"
-              subtext="Tasks finished"
+              subtext="Finished"
             />
             <StatCard 
               icon={Percent}
@@ -280,64 +298,62 @@ function App() {
             />
           </section>
 
-          {/* Focus Notes Carousel */}
-          <FocusNotes />
+          {/* 2-Column Bento Workspace Architecture */}
+          <div className="bento-workspace-grid">
+            {/* Left Column: Task Workspace (Search, Filter Tabs, Task Rows) */}
+            <section className="task-workspace-card" aria-label="Task Workspace">
+              {/* Integrated Search and Filter Header */}
+              <div className="workspace-toolbar">
+                <SearchBar 
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  onClear={() => setSearchTerm('')}
+                />
 
-          {/* Search & Filter Suite */}
-          <div className="search-filter-section">
-            <SearchBar 
-              value={searchTerm}
-              onChange={setSearchTerm}
-              onClear={() => setSearchTerm('')}
-            />
+                <div className="workspace-filters-bar">
+                  <FilterTabs 
+                    statusFilter={statusFilter}
+                    onStatusChange={setStatusFilter}
+                    priorityFilter={priorityFilter}
+                    onPriorityChange={setPriorityFilter}
+                    onClearFilters={handleClearFilters}
+                    isFilterActive={isFilterActive}
+                    statusCounts={statusCounts}
+                  />
 
-            <FilterTabs 
-              statusFilter={statusFilter}
-              onStatusChange={setStatusFilter}
-              priorityFilter={priorityFilter}
-              onPriorityChange={setPriorityFilter}
-              onClearFilters={handleClearFilters}
-              isFilterActive={isFilterActive}
-              statusCounts={statusCounts}
-            />
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary btn-sm"
+                    onClick={handleResetSampleData}
+                    title="Reset all tasks to initial sample dataset"
+                  >
+                    <RotateCcw size={13} />
+                    <span>Reset Tasks</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Task Display Rows */}
+              <TaskList 
+                tasks={filteredTasks}
+                isFilterActive={isFilterActive}
+                onClearFilters={handleClearFilters}
+                onStatusChange={handleStatusChange}
+                onEdit={handleOpenEditModal}
+                onDelete={handleRequestDelete}
+              />
+            </section>
+
+            {/* Right Column: Companion Insights (Notes Carousel + Pomodoro Session) */}
+            <aside className="bento-companion-column" aria-label="Productivity Tools">
+              <FocusNotes />
+              <DeepFocusTimer 
+                completedCount={completedCount}
+                totalTasks={totalTasks}
+                onComplete={() => addToast('Deep focus session complete! Well done.', 'success')}
+              />
+            </aside>
           </div>
-
-          {/* Section Header with Active Results Count & Reset Action */}
-          <div className="dashboard-section-header">
-            <div>
-              <h2 className="section-title">
-                {isFilterActive ? `Filtered Tasks (${filteredTasks.length})` : `All Tasks (${tasks.length})`}
-              </h2>
-              <p className="section-subtitle">
-                {isFilterActive 
-                  ? `Showing results matching your active search and filter parameters.`
-                  : `Browse, filter, and organize all tasks on your board.`
-                }
-              </p>
-            </div>
-
-            <div className="section-header-actions">
-              <button 
-                type="button" 
-                className="btn btn-secondary btn-sm"
-                onClick={handleResetSampleData}
-                title="Reset all tasks to initial sample dataset"
-              >
-                <RotateCcw size={14} />
-                <span>Reset to Sample Tasks</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Task Display with Delete Confirmation Hook */}
-          <TaskList 
-            tasks={filteredTasks}
-            isFilterActive={isFilterActive}
-            onClearFilters={handleClearFilters}
-            onStatusChange={handleStatusChange}
-            onEdit={handleOpenEditModal}
-            onDelete={handleRequestDelete}
-          />
         </main>
       </div>
 

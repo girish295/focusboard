@@ -1,30 +1,22 @@
 import { 
   Calendar, 
-  Clock, 
-  CheckCircle2, 
-  Circle,
-  AlertCircle, 
+  Check, 
   Pencil, 
-  Trash2, 
-  Tag, 
-  AlertTriangle 
+  Trash2
 } from 'lucide-react'
 
 // Pure date helper evaluated outside render
 const getTodayIsoString = () => new Date().toISOString().split('T')[0]
 
 /**
- * TaskCard Component
+ * TaskCard Component (Streamlined Bento Task Row)
  * 
  * Renders an individual task with:
- * - Left priority color accent stripe
- * - One-click circular completion toggle button
- * - Category & priority badge (text + color for WCAG AA compliance)
- * - Title (with word-wrap protection against overflow)
- * - Description with line clamping
- * - Due date with overdue detection
- * - Accessible inline status switcher dropdown
- * - Edit and Delete action controls
+ * - One-click completion checkbox button
+ * - Strikethrough on completed title
+ * - Category badge, priority dot indicator, and due date
+ * - Interactive status cycle pill
+ * - Edit and delete actions
  * 
  * @param {Object} props
  * @param {Object} props.task - Task data model object.
@@ -42,8 +34,18 @@ export function TaskCard({
   const isOverdue = Boolean(task.dueDate && task.dueDate < todayStr && task.status !== 'completed')
   const isCompleted = task.status === 'completed'
 
-  const handleQuickToggle = () => {
+  const handleToggleCheck = () => {
     onStatusChange(task.id, isCompleted ? 'todo' : 'completed')
+  }
+
+  const handleCycleStatus = () => {
+    const cycleMap = {
+      'todo': 'in-progress',
+      'in-progress': 'completed',
+      'completed': 'todo'
+    }
+    const nextStatus = cycleMap[task.status] || 'todo'
+    onStatusChange(task.id, nextStatus)
   }
 
   // Format display date (e.g. "Nov 25, 2026")
@@ -54,8 +56,7 @@ export function TaskCard({
       const date = new Date(year, month - 1, day)
       return date.toLocaleDateString('en-US', {
         month: 'short',
-        day: 'numeric',
-        year: 'numeric'
+        day: 'numeric'
       })
     } catch {
       return dateStr
@@ -63,131 +64,109 @@ export function TaskCard({
   }
 
   // Priority metadata helper
-  const getPriorityMeta = (priority) => {
+  const getPriorityLabel = (priority) => {
     switch (priority) {
       case 'high':
-        return { label: 'High Priority', className: 'priority-high', icon: AlertTriangle }
+        return 'High'
       case 'medium':
-        return { label: 'Medium Priority', className: 'priority-medium', icon: Clock }
+        return 'Medium'
       default:
-        return { label: 'Low Priority', className: 'priority-low', icon: CheckCircle2 }
+        return 'Low'
     }
   }
 
-  const priorityMeta = getPriorityMeta(task.priority)
-  const PriorityIcon = priorityMeta.icon
+  // Status display label
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'todo':
+        return 'To Do'
+      case 'in-progress':
+        return 'In Progress'
+      case 'completed':
+        return 'Completed'
+      default:
+        return status
+    }
+  }
 
   return (
     <article 
-      className={`task-card ${isCompleted ? 'task-card-completed' : ''} ${isOverdue ? 'task-card-overdue' : ''}`}
+      className={`task-row ${isCompleted ? 'task-row-completed' : ''} ${isOverdue ? 'task-row-overdue' : ''}`}
       aria-labelledby={`task-title-${task.id}`}
     >
-      {/* Left Priority Accent Stripe */}
-      <div className={`task-priority-accent priority-accent-${task.priority}`} aria-hidden="true" />
+      {/* Left Area: Checkbox + Title & Metadata */}
+      <div className="task-row-main">
+        {/* Quick Complete Toggle Button */}
+        <button
+          type="button"
+          onClick={handleToggleCheck}
+          className={`task-row-check ${isCompleted ? 'check-completed' : ''}`}
+          aria-label={isCompleted ? `Mark "${task.title}" as incomplete` : `Mark "${task.title}" as complete`}
+        >
+          {isCompleted && <Check size={13} className="check-icon" />}
+        </button>
 
-      {/* Top Meta Bar: Category, Priority, and Actions */}
-      <div className="task-card-header">
-        <div className="task-badges-group">
-          {task.category && (
-            <span className="task-badge badge-category">
-              <Tag size={12} className="badge-icon" />
-              <span>{task.category}</span>
+        <div className="task-row-details">
+          <p 
+            id={`task-title-${task.id}`} 
+            className={`task-row-title ${isCompleted ? 'title-struck' : ''}`}
+          >
+            {task.title}
+          </p>
+
+          <div className="task-row-meta">
+            {task.category && (
+              <span className="task-row-category">{task.category}</span>
+            )}
+
+            <span className="task-row-priority">
+              <span className={`priority-dot dot-${task.priority}`} aria-hidden="true" />
+              <span>{getPriorityLabel(task.priority)}</span>
             </span>
-          )}
 
-          <span className={`task-badge ${priorityMeta.className}`}>
-            <PriorityIcon size={12} className="badge-icon" />
-            <span>{priorityMeta.label}</span>
-          </span>
+            {task.dueDate && (
+              <span className={`task-row-due ${isOverdue ? 'due-overdue' : ''}`}>
+                <Calendar size={12} className="due-icon" aria-hidden="true" />
+                <span>{formatDueDate(task.dueDate)}</span>
+                {isOverdue && <span className="overdue-tag">Overdue</span>}
+              </span>
+            )}
+          </div>
         </div>
+      </div>
 
-        {/* Card Actions (Edit, Delete) */}
-        <div className="task-card-actions">
+      {/* Right Area: Interactive Status Pill + Action Controls */}
+      <div className="task-row-actions">
+        <button
+          type="button"
+          onClick={handleCycleStatus}
+          className={`task-status-pill status-pill-${task.status}`}
+          title="Click to cycle status: To Do → In Progress → Completed"
+          aria-label={`Current status: ${getStatusLabel(task.status)}. Click to cycle status.`}
+        >
+          {getStatusLabel(task.status)}
+        </button>
+
+        <div className="task-btn-group">
           <button
             type="button"
-            className="card-action-btn btn-edit"
+            className="row-action-btn btn-edit"
             onClick={() => onEdit(task)}
             aria-label={`Edit task: ${task.title}`}
             title="Edit task"
           >
-            <Pencil size={15} />
+            <Pencil size={14} />
           </button>
 
           <button
             type="button"
-            className="card-action-btn btn-delete"
+            className="row-action-btn btn-delete"
             onClick={() => onDelete(task.id)}
             aria-label={`Delete task: ${task.title}`}
             title="Delete task"
           >
-            <Trash2 size={15} />
+            <Trash2 size={14} />
           </button>
-        </div>
-      </div>
-
-      {/* Title & Description with Quick Checkbox */}
-      <div className="task-card-body">
-        <div className="task-title-row">
-          <button
-            type="button"
-            className={`task-quick-check ${isCompleted ? 'is-checked' : ''}`}
-            onClick={handleQuickToggle}
-            aria-label={isCompleted ? `Mark "${task.title}" as to do` : `Mark "${task.title}" as completed`}
-            title={isCompleted ? "Mark as To Do" : "Mark as Completed"}
-          >
-            {isCompleted ? (
-              <CheckCircle2 size={19} className="quick-check-icon icon-checked" />
-            ) : (
-              <Circle size={19} className="quick-check-icon icon-unchecked" />
-            )}
-          </button>
-
-          <h3 id={`task-title-${task.id}`} className="task-title">
-            {task.title}
-          </h3>
-        </div>
-
-        {task.description && (
-          <p className="task-description">
-            {task.description}
-          </p>
-        )}
-      </div>
-
-      {/* Footer: Due Date & Status Control */}
-      <div className="task-card-footer">
-        {/* Due Date Indicator */}
-        <div className={`task-due-date ${isOverdue ? 'due-overdue' : ''}`}>
-          {isOverdue ? (
-            <AlertCircle size={14} className="due-icon" />
-          ) : (
-            <Calendar size={14} className="due-icon" />
-          )}
-          <time dateTime={task.dueDate}>
-            {formatDueDate(task.dueDate)}
-            {isOverdue && <span className="overdue-tag">Overdue</span>}
-          </time>
-        </div>
-
-        {/* Interactive Quick Status Switcher */}
-        <div className="task-status-control">
-          <label htmlFor={`status-select-${task.id}`} className="sr-only">
-            Change status for {task.title}
-          </label>
-          <div className={`status-select-wrapper status-${task.status}`}>
-            <select
-              id={`status-select-${task.id}`}
-              value={task.status}
-              onChange={(e) => onStatusChange(task.id, e.target.value)}
-              className="status-select"
-              aria-label={`Status for ${task.title}`}
-            >
-              <option value="todo">To Do</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
-            <span className="status-indicator-dot" aria-hidden="true" />
-          </div>
         </div>
       </div>
     </article>

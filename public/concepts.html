@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusBoard — 4 Interactive Layout & Design Concepts</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* =========================================================================
+       DESIGN SYSTEM TOKENS FOR ALL 4 ARCHITECTURES
+       ========================================================================= */
+
+    /* 1. BENTO SPLIT + INDIGO (Default) */
+    [data-design="bento"] {
+      --bg-canvas: #F4F5F7;
+      --bg-sidebar: #FFFFFF;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #EEF0F4;
+      --border-hairline: #E5E7EB;
+      --border-strong: #D1D5DB;
+
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-muted: #6B7280;
+
+      --accent-primary: #4F46E5;
+      --accent-hover: #4338CA;
+      --accent-soft: #EEF2FF;
+      --accent-border: #C7D2FE;
+      --accent-text: #4338CA;
+      --btn-text: #FFFFFF;
+
+      --status-todo-bg: #FFFBEB;
+      --status-todo-text: #B45309;
+      --status-todo-border: #FDE68A;
+
+      --status-progress-bg: #EFF6FF;
+      --status-progress-text: #1D4ED8;
+      --status-progress-border: #BFDBFE;
+
+      --status-done-bg: #ECFDF5;
+      --status-done-text: #047857;
+      --status-done-border: #A7F3D0;
+
+      --radius-card: 20px;
+      --radius-control: 12px;
+      --radius-pill: 9999px;
+      --card-shadow: 0 1px 3px rgba(17, 24, 39, 0.04), 0 6px 16px rgba(17, 24, 39, 0.02);
+      --card-blur: none;
+    }
+
+    /* 2. OBSIDIAN DARK + GLASS */
+    [data-design="obsidian"] {
+      --bg-canvas: #0B0D12;
+      --bg-sidebar: rgba(19, 23, 34, 0.85);
+      --bg-surface: rgba(19, 23, 34, 0.78);
+      --bg-subtle: rgba(30, 36, 52, 0.75);
+      --border-hairline: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+
+      --accent-primary: #14B8A6;
+      --accent-hover: #0D9488;
+      --accent-soft: rgba(20, 184, 166, 0.14);
+      --accent-border: rgba(20, 184, 166, 0.32);
+      --accent-text: #2DD4BF;
+      --btn-text: #042F2E;
+
+      --status-todo-bg: rgba(245, 158, 11, 0.14);
+      --status-todo-text: #FBBF24;
+      --status-todo-border: rgba(245, 158, 11, 0.3);
+
+      --status-progress-bg: rgba(139, 92, 246, 0.16);
+      --status-progress-text: #C4B5FD;
+      --status-progress-border: rgba(139, 92, 246, 0.34);
+
+      --status-done-bg: rgba(20, 184, 166, 0.14);
+      --status-done-text: #2DD4BF;
+      --status-done-border: rgba(20, 184, 166, 0.3);
+
+      --radius-card: 16px;
+      --radius-control: 10px;
+      --radius-pill: 9999px;
+      --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.38);
+      --card-blur: blur(14px);
+    }
+
+    /* 3. SCANDINAVIAN SAGE & SAND */
+    [data-design="scandi"] {
+      --bg-canvas: #FAF8F5;
+      --bg-sidebar: #FAF8F5;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F2EFE9;
+      --border-hairline: #EAE5DC;
+      --border-strong: #D6CFC2;
+
+      --text-primary: #1C1917;
+      --text-secondary: #57534E;
+      --text-muted: #78716C;
+
+      --accent-primary: #2D6A4F;
+      --accent-hover: #1B4332;
+      --accent-soft: #E9F3EE;
+      --accent-border: #B7DEC9;
+      --accent-text: #1B4332;
+      --btn-text: #FFFFFF;
+
+      --status-todo-bg: #FFF4ED;
+      --status-todo-text: #C2410C;
+      --status-todo-border: #FED7AA;
+
+      --status-progress-bg: #F3F0EA;
+      --status-progress-text: #44403C;
+      --status-progress-border: #D6CFC2;
+
+      --status-done-bg: #E9F3EE;
+      --status-done-text: #2D6A4F;
+      --status-done-border: #B7DEC9;
+
+      --radius-card: 22px;
+      --radius-control: 9999px;
+      --radius-pill: 9999px;
+      --card-shadow: 0 2px 10px rgba(28, 25, 23, 0.03);
+      --card-blur: none;
+    }
+
+    /* 4. TOP-NAV MONOCHROME */
+    [data-design="topnav"] {
+      --bg-canvas: #F9FAFB;
+      --bg-sidebar: #FFFFFF;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F3F4F6;
+      --border-hairline: #E5E7EB;
+      --border-strong: #D1D5DB;
+
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-muted: #6B7280;
+
+      --accent-primary: #111827;
+      --accent-hover: #1F2937;
+      --accent-soft: #EFF6FF;
+      --accent-border: #BFDBFE;
+      --accent-text: #1D4ED8;
+      --btn-text: #FFFFFF;
+
+      --status-todo-bg: #F3F4F6;
+      --status-todo-text: #374151;
+      --status-todo-border: #D1D5DB;
+
+      --status-progress-bg: #EFF6FF;
+      --status-progress-text: #1D4ED8;
+      --status-progress-border: #BFDBFE;
+
+      --status-done-bg: #ECFDF5;
+      --status-done-text: #065F46;
+      --status-done-border: #A7F3D0;
+
+      --radius-card: 14px;
+      --radius-control: 10px;
+      --radius-pill: 8px;
+      --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --card-blur: none;
+    }
+
+    /* Base Typography & Smooth Layout Transitions */
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fb-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-card);
+      box-shadow: var(--card-shadow);
+      backdrop-filter: var(--card-blur);
+      -webkit-backdrop-filter: var(--card-blur);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fb-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .fb-btn-primary {
+      background-color: var(--accent-primary);
+      color: var(--btn-text);
+      border-radius: var(--radius-control);
+      transition: all 0.2s ease;
+    }
+
+    .fb-btn-primary:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .fb-control {
+      border-radius: var(--radius-control);
+      transition: all 0.2s ease;
+    }
+
+    /* Obsidian Top-Left Radial Spotlight Glow */
+    #obsidianGlow {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    [data-design="obsidian"] #obsidianGlow {
+      opacity: 1;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body data-design="bento" class="min-h-screen flex flex-col overflow-x-hidden relative">
+
+  <!-- Obsidian Mode Ambient Spotlight Glow -->
+  <div id="obsidianGlow" class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+    <div class="absolute -top-32 -left-32 w-[540px] h-[540px] rounded-full opacity-20 blur-[110px]" style="background: radial-gradient(circle, #14B8A6 0%, #8B5CF6 55%, transparent 75%);"></div>
+    <div class="absolute top-1/3 right-0 w-[380px] h-[380px] rounded-full opacity-10 blur-[120px]" style="background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);"></div>
+  </div>
+
+  <!-- FLOATING / TOP DESIGN STYLE SWITCHER BAR -->
+  <div class="sticky top-0 z-50 w-full border-b backdrop-blur-md transition-colors duration-300" style="background-color: rgba(15, 17, 23, 0.92); border-color: rgba(255,255,255,0.1); color: #F8FAFC;">
+    <div class="max-w-[1440px] mx-auto px-3 sm:px-6 py-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+          <i data-lucide="wand-2" class="w-3 h-3"></i>
+        </span>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-300">Design Style Switcher</span>
+        <span id="activeDesignBadge" class="hidden sm:inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/10 text-zinc-300">
+          2-Column Bento Workspace
+        </span>
+      </div>
+
+      <!-- 4 Interactive Design Tabs -->
+      <div id="designSwitcherTabs" class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+        <button data-design-choice="bento" class="design-tab shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-indigo-600 text-white shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-indigo-200"></span>
+          <span>1. Bento Split + Indigo</span>
+        </button>
+
+        <button data-design-choice="obsidian" class="design-tab shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer text-zinc-300 hover:text-white hover:bg-white/10">
+          <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+          <span>2. Obsidian Dark + Glass</span>
+        </button>
+
+        <button data-design-choice="scandi" class="design-tab shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer text-zinc-300 hover:text-white hover:bg-white/10">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>3. Scandinavian Sage &amp; Sand</span>
+        </button>
+
+        <button data-design-choice="topnav" class="design-tab shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer text-zinc-300 hover:text-white hover:bg-white/10">
+          <span class="w-2 h-2 rounded-full bg-zinc-100"></span>
+          <span>4. Top-Nav Monochrome</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP SHELL -->
+  <div id="appShell" class="flex-1 flex flex-col lg:flex-row relative z-10">
+
+    <!-- LEFT SIDEBAR -->
+    <aside id="leftSidebar" class="fixed lg:sticky top-[45px] left-0 z-40 h-[calc(100vh-45px)] w-[230px] shrink-0 flex flex-col justify-between p-4 -translate-x-full lg:translate-x-0 transition-all duration-300" style="background-color: var(--bg-sidebar); border-right: 1px solid var(--border-hairline);">
+      <div>
+        <div class="flex items-center justify-between px-2 pt-1 pb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-xs transition-colors" style="background-color: var(--accent-primary); color: var(--btn-text);">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h1 class="font-bold text-[15px] tracking-tight leading-tight">FocusBoard</h1>
+              <p class="text-[10px] font-bold tracking-[0.14em] uppercase mt-0.5" style="color: var(--text-muted);">WORKSPACE</p>
+            </div>
+          </div>
+          <button id="closeSidebarBtn" class="lg:hidden p-1.5 rounded-lg" style="color: var(--text-secondary);">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="px-2.5 mb-2">
+          <span class="text-[10px] font-bold tracking-[0.14em] uppercase" style="color: var(--text-muted);">MENU</span>
+        </div>
+
+        <nav class="space-y-1" id="sidebarNavList">
+          <button data-nav="Dashboard" class="nav-sync w-full flex items-center justify-between px-3 py-2.5 text-[13.5px] font-semibold transition-all cursor-pointer fb-control" style="background-color: var(--accent-soft); color: var(--accent-text); border: 1px solid var(--accent-border);">
+            <span class="flex items-center gap-2.5">
+              <i data-lucide="layout-grid" class="w-4 h-4"></i>
+              <span>Dashboard</span>
+            </span>
+          </button>
+
+          <button data-nav="All Tasks" class="nav-sync w-full flex items-center justify-between px-3 py-2.5 text-[13.5px] font-medium transition-all cursor-pointer fb-control" style="color: var(--text-secondary); border: 1px solid transparent;">
+            <span class="flex items-center gap-2.5">
+              <i data-lucide="check-square" class="w-4 h-4"></i>
+              <span>All Tasks</span>
+            </span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background-color: var(--accent-primary); color: var(--btn-text);">Live</span>
+          </button>
+
+          <button data-nav="Focus Notes" class="nav-sync w-full flex items-center justify-between px-3 py-2.5 text-[13.5px] font-medium transition-all cursor-pointer fb-control" style="color: var(--text-secondary); border: 1px solid transparent;">
+            <span class="flex items-center gap-2.5">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span>Focus Notes</span>
+            </span>
+          </button>
+
+          <button data-nav="Analytics" class="nav-sync w-full flex items-center justify-between px-3 py-2.5 text-[13.5px] font-medium transition-all cursor-pointer fb-control" style="color: var(--text-secondary); border: 1px solid transparent;">
+            <span class="flex items-center gap-2.5">
+              <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+              <span>Analytics</span>
+            </span>
+          </button>
+
+          <button data-nav="Settings" class="nav-sync w-full flex items-center justify-between px-3 py-2.5 text-[13.5px] font-medium transition-all cursor-pointer fb-control" style="color: var(--text-secondary); border: 1px solid transparent;">
+            <span class="flex items-center gap-2.5">
+              <i data-lucide="settings" class="w-4 h-4"></i>
+              <span>Settings</span>
+            </span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="pt-3" style="border-top: 1px solid var(--border-hairline);">
+        <div class="flex items-center gap-3 p-2.5 fb-control" style="background-color: var(--bg-subtle);">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0" style="background-color: var(--accent-soft); color: var(--accent-text); border: 1px solid var(--accent-border);">
+            FD
+          </div>
+          <div class="min-w-0">
+            <p class="text-[13px] font-bold truncate leading-tight">Frontend Dev</p>
+            <p class="text-[11px] truncate mt-0.5" style="color: var(--text-secondary);">Candidate Assessment</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main id="mainContainer" class="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6 mx-auto w-full max-w-[1440px] transition-all duration-300">
+      <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6">
+        <div>
+          <div class="flex flex-wrap items-center gap-3">
+            <h2 class="text-2xl sm:text-[26px] font-extrabold tracking-tight">Task Dashboard</h2>
+            <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full" style="background-color: var(--accent-soft); color: var(--accent-text); border: 1px solid var(--accent-border);">
+              <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background-color: var(--accent-primary);"></span>
+              Workspace Live
+            </span>
+          </div>
+          <p class="text-[13.5px] mt-1" style="color: var(--text-secondary);">
+            Manage your workload, monitor priorities, and stay focused.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium fb-card" style="color: var(--text-secondary);">
+            <i data-lucide="calendar" class="w-4 h-4" style="color: var(--text-muted);"></i>
+            <span>Mon, Nov 23, 2026</span>
+          </div>
+
+          <button id="openNewTaskBtn" class="fb-btn-primary inline-flex items-center gap-2 px-4 py-2 text-[13.5px] font-semibold shadow-xs cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>New Task</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- KPI METRICS STRIP -->
+      <section aria-label="Task Metrics" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
+        <div class="fb-card p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[13px] font-semibold" style="color: var(--text-secondary);">Total Tasks</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: var(--bg-subtle); color: var(--text-primary);">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline justify-between mt-1">
+            <span id="kpiTotal" class="text-2xl sm:text-[28px] font-extrabold tracking-tight tabular-nums">6</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">All categories</span>
+          </div>
+        </div>
+
+        <div class="fb-card p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[13px] font-semibold" style="color: var(--text-secondary);">To Do</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: var(--status-todo-bg); color: var(--status-todo-text);">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline justify-between mt-1">
+            <span id="kpiTodo" class="text-2xl sm:text-[28px] font-extrabold tracking-tight tabular-nums">3</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">Awaiting start</span>
+          </div>
+        </div>
+
+        <div class="fb-card p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[13px] font-semibold" style="color: var(--text-secondary);">In Progress</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: var(--status-progress-bg); color: var(--status-progress-text);">
+              <i data-lucide="loader" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline justify-between mt-1">
+            <span id="kpiProgress" class="text-2xl sm:text-[28px] font-extrabold tracking-tight tabular-nums">2</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">In flight</span>
+          </div>
+        </div>
+
+        <div class="fb-card p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[13px] font-semibold" style="color: var(--text-secondary);">Completed</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: var(--status-done-bg); color: var(--status-done-text);">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline justify-between mt-1">
+            <span id="kpiCompleted" class="text-2xl sm:text-[28px] font-extrabold tracking-tight tabular-nums">1</span>
+            <span class="text-[11px]" style="color: var(--text-muted);">Finished</span>
+          </div>
+        </div>
+
+        <div class="fb-card p-4 flex items-center justify-between gap-3 sm:col-span-2 lg:col-span-1">
+          <div>
+            <span class="text-[13px] font-semibold block" style="color: var(--text-secondary);">Completion Rate</span>
+            <div id="kpiRate" class="text-2xl sm:text-[28px] font-extrabold tracking-tight tabular-nums mt-1 leading-none">17%</div>
+            <p id="kpiRateSub" class="text-[11px] mt-1.5 tabular-nums" style="color: var(--text-muted);">1 of 6 completed</p>
+          </div>
+
+          <div class="relative w-14 h-14 shrink-0 flex items-center justify-center">
+            <svg class="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
+              <circle cx="28" cy="28" r="22" fill="none" stroke-width="5" style="stroke: var(--bg-subtle);"></circle>
+              <circle id="completionRingCircle" cx="28" cy="28" r="22" fill="none" stroke-width="5" stroke-linecap="round"
+                stroke-dasharray="138.23" stroke-dashoffset="114.73"
+                style="stroke: var(--accent-primary); transition: stroke-dashoffset 0.45s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.3s ease;"></circle>
+            </svg>
+            <i data-lucide="trending-up" class="w-4 h-4 absolute" style="color: var(--accent-text);"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2-COLUMN BENTO GRID -->
+      <div id="workspaceGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <section id="taskWorkspaceCol" aria-label="Task List & Controls" class="lg:col-span-8 fb-card overflow-hidden">
+          <div class="p-4 sm:p-5 space-y-3.5" style="border-bottom: 1px solid var(--border-hairline);">
+            <div class="relative flex items-center">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3.5 pointer-events-none" style="color: var(--text-muted);"></i>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search tasks by title... (Press / to search)"
+                class="w-full pl-10 pr-12 py-2.5 text-[13.5px] border focus:outline-none fb-control"
+                style="background-color: var(--bg-subtle); border-color: var(--border-hairline); color: var(--text-primary);"
+              />
+              <kbd class="hidden sm:inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-semibold rounded-md border absolute right-3 pointer-events-none" style="background-color: var(--bg-surface); border-color: var(--border-hairline); color: var(--text-muted);">/</kbd>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div id="statusTabs" class="inline-flex flex-wrap items-center gap-1 p-1 fb-control self-start" style="background-color: var(--bg-subtle);">
+                <button data-status="ALL" class="status-tab px-3 py-1.5 text-[12.5px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer fb-control" style="background-color: var(--bg-surface); color: var(--text-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.06);">
+                  <span>All Tasks</span>
+                  <span id="tabCountAll" class="text-[11px] font-bold px-1.5 py-0.2 rounded-full tabular-nums" style="background-color: var(--accent-soft); color: var(--accent-text);">6</span>
+                </button>
+                <button data-status="To Do" class="status-tab px-3 py-1.5 text-[12.5px] font-medium flex items-center gap-1.5 transition-all cursor-pointer fb-control" style="color: var(--text-secondary);">
+                  <span>To Do</span>
+                  <span id="tabCountTodo" class="text-[11px] font-semibold px-1.5 py-0.2 rounded-full tabular-nums" style="background-color: var(--bg-surface); color: var(--text-secondary);">3</span>
+                </button>
+                <button data-status="In Progress" class="status-tab px-3 py-1.5 text-[12.5px] font-medium flex items-center gap-1.5 transition-all cursor-pointer fb-control" style="color: var(--text-secondary);">
+                  <span>In Progress</span>
+                  <span id="tabCountProgress" class="text-[11px] font-semibold px-1.5 py-0.2 rounded-full tabular-nums" style="background-color: var(--bg-surface); color: var(--text-secondary);">2</span>
+                </button>
+                <button data-status="Completed" class="status-tab px-3 py-1.5 text-[12.5px] font-medium flex items-center gap-1.5 transition-all cursor-pointer fb-control" style="color: var(--text-secondary);">
+                  <span>Completed</span>
+                  <span id="tabCountCompleted" class="text-[11px] font-semibold px-1.5 py-0.2 rounded-full tabular-nums" style="background-color: var(--bg-surface); color: var(--text-secondary);">1</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2 px-3 py-1.5 border text-[12.5px] fb-control self-start sm:self-auto" style="background-color: var(--bg-surface); border-color: var(--border-hairline);">
+                <i data-lucide="filter" class="w-3.5 h-3.5" style="color: var(--text-muted);"></i>
+                <span style="color: var(--text-secondary);">Priority:</span>
+                <select id="priorityFilter" class="bg-transparent font-semibold focus:outline-none cursor-pointer" style="color: var(--text-primary);">
+                  <option value="ALL">All Priorities</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="taskListContainer" class="divide-y" style="border-color: var(--border-hairline);"></div>
+        </section>
+
+        <!-- RIGHT SIDE COLUMN -->
+        <div id="insightsCol" class="lg:col-span-4 space-y-5 order-first lg:order-last">
+          <section aria-label="Focus Notes and Productivity Tips" class="fb-card p-5 relative overflow-hidden">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+              <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full" style="background-color: var(--accent-soft); color: var(--accent-text); border: 1px solid var(--accent-border);">
+                <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
+                Focus Notes &amp; Productivity Tips
+              </span>
+              <span id="tipCounter" class="text-xs font-semibold tabular-nums" style="color: var(--text-muted);">Slide 1 of 3</span>
+            </div>
+
+            <div class="mb-3">
+              <span id="tipBadge" class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full" style="background-color: var(--bg-subtle); color: var(--text-secondary);">
+                <i data-lucide="clock" class="w-3 h-3"></i>
+                Saves up to 40% of daily cognitive friction
+              </span>
+            </div>
+
+            <div>
+              <div id="tipCategory" class="text-[11px] font-bold tracking-[0.12em] uppercase mb-1" style="color: var(--accent-text);">TIME MANAGEMENT</div>
+              <h3 id="tipTitle" class="text-base sm:text-lg font-bold tracking-tight mb-2 leading-snug">The 2-Minute Rule for Quick Tasks</h3>
+              <p id="tipDescription" class="text-[13px] leading-relaxed" style="color: var(--text-secondary);">
+                If an incoming task takes less than two minutes to complete, tackle it immediately rather than scheduling it.
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between mt-5 pt-3.5" style="border-top: 1px solid var(--border-hairline);">
+              <div class="flex items-center gap-2">
+                <button id="prevTipBtn" class="w-8 h-8 rounded-full flex items-center justify-center border hover:opacity-75 cursor-pointer" style="border-color: var(--border-hairline); background-color: var(--bg-surface); color: var(--text-primary);" aria-label="Previous Slide">
+                  <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                </button>
+                <button id="nextTipBtn" class="w-8 h-8 rounded-full flex items-center justify-center border hover:opacity-75 cursor-pointer" style="border-color: var(--border-hairline); background-color: var(--bg-surface); color: var(--text-primary);" aria-label="Next Slide">
+                  <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <button data-slide="0" class="tip-dot h-2 w-6 rounded-full cursor-pointer" style="background-color: var(--accent-primary);"></button>
+                <button data-slide="1" class="tip-dot h-2 w-2 rounded-full cursor-pointer" style="background-color: var(--border-strong);"></button>
+                <button data-slide="2" class="tip-dot h-2 w-2 rounded-full cursor-pointer" style="background-color: var(--border-strong);"></button>
+              </div>
+            </div>
+          </section>
+
+          <section id="bentoFocusWidget" aria-label="Daily Focus Session" class="fb-card p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background-color: var(--accent-soft); color: var(--accent-text);">
+                  <i data-lucide="timer" class="w-4 h-4"></i>
+                </div>
+                <h4 class="text-sm font-bold tracking-tight">Deep Focus Session</h4>
+              </div>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background-color: var(--bg-subtle); color: var(--text-secondary);">Pomodoro</span>
+            </div>
+
+            <div class="flex items-center justify-between p-3.5 mb-3.5 fb-control" style="background-color: var(--bg-subtle);">
+              <div>
+                <div id="focusTimerDisplay" class="text-2xl font-extrabold tabular-nums tracking-tight">25:00</div>
+                <div class="text-[11px]" style="color: var(--text-muted);">Next break in 25 mins</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button id="toggleTimerBtn" class="fb-btn-primary px-3.5 py-1.5 text-xs font-semibold cursor-pointer">Start Focus</button>
+                <button id="resetTimerBtn" class="p-2 rounded-lg border text-xs cursor-pointer" style="border-color: var(--border-hairline); background-color: var(--bg-surface); color: var(--text-secondary);" title="Reset Timer">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-medium" style="color: var(--text-secondary);">Workload Progress</span>
+                <span id="bentoProgressText" class="font-bold tabular-nums">1 / 6 Done</span>
+              </div>
+              <div class="w-full h-2 rounded-full overflow-hidden flex gap-0.5" style="background-color: var(--bg-subtle);">
+                <div id="barDone" class="h-full transition-all duration-300" style="width: 17%; background-color: var(--accent-primary);"></div>
+                <div id="barProgress" class="h-full transition-all duration-300 opacity-50" style="width: 33%; background-color: var(--accent-primary);"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -5,10 +5,8 @@ import { ClipboardList, SearchX, RotateCcw } from 'lucide-react'
 /**
  * TaskList Component
  * 
- * Renders the collection of tasks using reusable TaskCard components.
- * Intelligently delegates to EmptyState when 0 tasks are present:
- * 1. An entirely empty board (no tasks exist)
- * 2. An empty search/filter result (tasks exist, but none match active criteria)
+ * Renders the collection of tasks using reusable TaskCard row components.
+ * Intelligently delegates to EmptyState when 0 tasks are present.
  * 
  * @param {Object} props
  * @param {Array} props.tasks - Array of tasks to render (already filtered).
@@ -33,7 +31,7 @@ export function TaskList({
         icon={SearchX}
         variant="search"
         title="No matching tasks found"
-        description="We couldn't find any tasks matching your search query or active filter selections."
+        description="Try clearing your search query or changing active status/priority filters."
         actionLabel="Clear All Filters"
         actionIcon={RotateCcw}
         onAction={onClearFilters}
@@ -48,15 +46,15 @@ export function TaskList({
         icon={ClipboardList}
         variant="default"
         title="No tasks available"
-        description="Your task board is currently empty. Click 'Create Task' or 'Reset to Sample Tasks' to get started."
+        description="Your task board is currently empty. Click 'New Task' or 'Reset' to get started."
       />
     )
   }
 
-  // Populated Task Grid
+  // Populated Task Rows
   return (
     <section className="task-list-section" aria-label={`Task list containing ${tasks.length} tasks`}>
-      <div className="task-grid">
+      <div className="task-rows-container" role="list">
         {tasks.map((task) => (
           <TaskCard
             key={task.id}

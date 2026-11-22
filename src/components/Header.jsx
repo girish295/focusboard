@@ -14,7 +14,7 @@ const getTodayFormatted = () => {
  * Header Component
  * 
  * Top dashboard header featuring title, live workspace pulse indicator,
- * interactive 1-click theme switcher, mobile menu trigger, date indicator,
+ * interactive 4-concept theme switcher, mobile menu trigger, date indicator,
  * and primary "New Task" action button.
  * 
  * @param {Object} props
@@ -26,7 +26,7 @@ const getTodayFormatted = () => {
 export function Header({ 
   onOpenCreateTask = () => {}, 
   onToggleSidebar = () => {},
-  currentTheme = 'crisp',
+  currentTheme = 'bento',
   onThemeChange = () => {}
 }) {
   const todayFormatted = getTodayFormatted()
@@ -62,7 +62,7 @@ export function Header({
         {/* Interactive Theme Palette Selector */}
         <div className="theme-switcher-wrapper">
           <label htmlFor="theme-selector-dropdown" className="sr-only">
-            Select Dashboard Theme
+            Select Dashboard Design & Theme
           </label>
           <Palette size={15} className="theme-icon" aria-hidden="true" />
           <select
@@ -70,12 +70,12 @@ export function Header({
             value={currentTheme}
             onChange={(e) => onThemeChange(e.target.value)}
             className="theme-dropdown"
-            aria-label="Select visual color theme"
+            aria-label="Select visual design theme"
           >
-            <option value="crisp">✨ Crisp Modern (Light)</option>
-            <option value="warm">🍂 Warm Notion (Cream)</option>
-            <option value="emerald">🌿 Fresh Emerald (Mint)</option>
-            <option value="midnight">🌙 Midnight Dark (Linear)</option>
+            <option value="bento">⚡ 1. Bento Split + Indigo</option>
+            <option value="obsidian">🌌 2. Obsidian Dark + Glass</option>
+            <option value="scandi">🌿 3. Scandinavian Sage & Sand</option>
+            <option value="topnav">🖤 4. Top-Nav Monochrome</option>
           </select>
         </div>
 
