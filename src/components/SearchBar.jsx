@@ -7,6 +7,7 @@ import { Search, X } from 'lucide-react'
  * - Controlled input handling
  * - Dedicated clear search button
  * - Keyboard support (Escape clears search)
+ * - Visual shortcut indicator pill
  * - Accessible ARIA labels and association
  * 
  * @param {Object} props
@@ -36,13 +37,13 @@ export function SearchBar({
           id="task-search-input"
           type="search"
           className="search-input"
-          placeholder="Search tasks by title..."
+          placeholder="Search tasks by title... (Press / to search)"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           autoComplete="off"
         />
-        {value.length > 0 && (
+        {value.length > 0 ? (
           <button
             type="button"
             className="search-clear-btn"
@@ -52,6 +53,10 @@ export function SearchBar({
           >
             <X size={16} />
           </button>
+        ) : (
+          <span className="search-shortcut-pill" aria-hidden="true" title="Press / to focus">
+            /
+          </span>
         )}
       </div>
     </div>

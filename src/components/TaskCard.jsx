@@ -2,11 +2,12 @@ import {
   Calendar, 
   Clock, 
   CheckCircle2, 
+  Circle,
   AlertCircle, 
   Pencil, 
-  Trash2,
-  Tag,
-  AlertTriangle
+  Trash2, 
+  Tag, 
+  AlertTriangle 
 } from 'lucide-react'
 
 // Pure date helper evaluated outside render
@@ -16,11 +17,13 @@ const getTodayIsoString = () => new Date().toISOString().split('T')[0]
  * TaskCard Component
  * 
  * Renders an individual task with:
+ * - Left priority color accent stripe
+ * - One-click circular completion toggle button
  * - Category & priority badge (text + color for WCAG AA compliance)
  * - Title (with word-wrap protection against overflow)
- * - Description
+ * - Description with line clamping
  * - Due date with overdue detection
- * - Accessible inline status switcher
+ * - Accessible inline status switcher dropdown
  * - Edit and Delete action controls
  * 
  * @param {Object} props
@@ -37,6 +40,11 @@ export function TaskCard({
 }) {
   const todayStr = getTodayIsoString()
   const isOverdue = Boolean(task.dueDate && task.dueDate < todayStr && task.status !== 'completed')
+  const isCompleted = task.status === 'completed'
+
+  const handleQuickToggle = () => {
+    onStatusChange(task.id, isCompleted ? 'todo' : 'completed')
+  }
 
   // Format display date (e.g. "Nov 25, 2026")
   const formatDueDate = (dateStr) => {
@@ -71,9 +79,12 @@ export function TaskCard({
 
   return (
     <article 
-      className={`task-card ${task.status === 'completed' ? 'task-card-completed' : ''} ${isOverdue ? 'task-card-overdue' : ''}`}
+      className={`task-card ${isCompleted ? 'task-card-completed' : ''} ${isOverdue ? 'task-card-overdue' : ''}`}
       aria-labelledby={`task-title-${task.id}`}
     >
+      {/* Left Priority Accent Stripe */}
+      <div className={`task-priority-accent priority-accent-${task.priority}`} aria-hidden="true" />
+
       {/* Top Meta Bar: Category, Priority, and Actions */}
       <div className="task-card-header">
         <div className="task-badges-group">
@@ -114,11 +125,28 @@ export function TaskCard({
         </div>
       </div>
 
-      {/* Title & Description with Overflow Protection */}
+      {/* Title & Description with Quick Checkbox */}
       <div className="task-card-body">
-        <h3 id={`task-title-${task.id}`} className="task-title">
-          {task.title}
-        </h3>
+        <div className="task-title-row">
+          <button
+            type="button"
+            className={`task-quick-check ${isCompleted ? 'is-checked' : ''}`}
+            onClick={handleQuickToggle}
+            aria-label={isCompleted ? `Mark "${task.title}" as to do` : `Mark "${task.title}" as completed`}
+            title={isCompleted ? "Mark as To Do" : "Mark as Completed"}
+          >
+            {isCompleted ? (
+              <CheckCircle2 size={19} className="quick-check-icon icon-checked" />
+            ) : (
+              <Circle size={19} className="quick-check-icon icon-unchecked" />
+            )}
+          </button>
+
+          <h3 id={`task-title-${task.id}`} className="task-title">
+            {task.title}
+          </h3>
+        </div>
+
         {task.description && (
           <p className="task-description">
             {task.description}

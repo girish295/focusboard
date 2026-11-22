@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { sampleTasks } from './data/sampleTasks'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { Sidebar } from './components/Sidebar'
@@ -24,6 +24,9 @@ import {
 function App() {
   // Single Source of Truth for tasks, persisted to localStorage
   const [tasks, setTasks] = useLocalStorage('focusboard_tasks', sampleTasks)
+  
+  // Theme State: 'crisp' | 'warm' | 'emerald' | 'midnight'
+  const [theme, setTheme] = useLocalStorage('focusboard_theme', 'crisp')
   
   // Navigation & Layout State
   const [activeNav, setActiveNav] = useState('dashboard')
@@ -182,8 +185,40 @@ function App() {
     addToast('Restored 6 initial sample tasks to state & storage.', 'info')
   }
 
+  // ---------------------------------------------------------------------------
+  // Global Keyboard Shortcuts (Press '/' to focus search, 'c' to create task)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      const activeEl = document.activeElement
+      const tagName = activeEl ? activeEl.tagName.toLowerCase() : ''
+      const isInputFocused = tagName === 'input' || tagName === 'textarea' || tagName === 'select' || activeEl?.isContentEditable
+
+      if (isInputFocused) {
+        return
+      }
+
+      if (e.key === '/') {
+        e.preventDefault()
+        const searchInput = document.getElementById('task-search-input')
+        if (searchInput) {
+          searchInput.focus()
+          searchInput.select()
+        }
+      } else if (e.key === 'c' || e.key === 'C') {
+        if (!isFormOpen && !isConfirmOpen) {
+          e.preventDefault()
+          handleOpenCreateModal()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleGlobalKeyDown)
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown)
+  }, [isFormOpen, isConfirmOpen])
+
   return (
-    <div className="app-layout">
+    <div className="app-layout" data-theme={theme}>
       {/* WCAG Skip to Main Content Link */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -202,6 +237,8 @@ function App() {
         <Header 
           onOpenCreateTask={handleOpenCreateModal}
           onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+          currentTheme={theme}
+          onThemeChange={setTheme}
         />
 
         <main id="main-content" className="content-container">
